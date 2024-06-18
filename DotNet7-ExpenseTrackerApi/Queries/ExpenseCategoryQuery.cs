@@ -41,7 +41,7 @@ public static class ExpenseCategoryQuery
     #region UpdateExpenseCategoryQuery
     public static string UpdateExpenseCategoryQuery()
     {
-        return @"UPDATE Expense_Category SET ExpenseCategoryName = @ExpenseCategoryName WEHRE ExpenseCategoryId = @ExpenseCategoryId";
+        return @"UPDATE Expense_Category SET ExpenseCategoryName = @ExpenseCategoryName WHERE ExpenseCategoryId = @ExpenseCategoryId";
     }
     #endregion
 

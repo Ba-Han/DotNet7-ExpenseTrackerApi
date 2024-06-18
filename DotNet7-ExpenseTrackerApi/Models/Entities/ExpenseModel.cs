@@ -8,6 +8,6 @@ public class ExpenseModel
     public long ExpenseCategoryId { get; set; }
     public long UserId { get; set; }
     public decimal Amount { get; set; }
-    public string CreateDate { get; set; } = null!;
+    public DateTime CreateDate { get; set; }
     public bool IsActive { get; set; }
 }

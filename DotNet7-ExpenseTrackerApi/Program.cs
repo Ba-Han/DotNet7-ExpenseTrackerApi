@@ -56,6 +56,8 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+//app.AddAuthorizationMiddleware();
+
 app.MapControllers();
 
 app.Run();

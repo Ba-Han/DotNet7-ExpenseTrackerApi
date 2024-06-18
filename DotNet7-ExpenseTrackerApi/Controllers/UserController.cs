@@ -23,7 +23,6 @@ public class UserController : ControllerBase
         _jwtService = jwtService;
     }
 
-    [Authorize]
     [HttpPost]
     [Route("/api/account/register")]
     public IActionResult Register([FromBody] RegisterRequestModel requestModel)
@@ -129,7 +128,6 @@ public class UserController : ControllerBase
         }
     }
 
-    [Authorize]
     [HttpPost]
     [Route("/api/account/login")]
     public IActionResult Login([FromBody] LoginRequestModel requestModel)

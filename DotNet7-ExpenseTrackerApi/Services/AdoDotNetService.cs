@@ -79,7 +79,7 @@ public class AdoDotNetService
     #endregion
 
     #region Excute
-    public int Excute(string query, SqlParameter[]? parameters = null)
+    public int Execute(string query, SqlParameter[]? parameters = null)
     {
         SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
         conn.Open();
@@ -93,7 +93,7 @@ public class AdoDotNetService
     #endregion
 
     #region Excute With Transaction
-    public int Excute(SqlConnection conn, SqlTransaction transaction, string query, SqlParameter[]? parameters = null)
+    public int Execute(SqlConnection conn, SqlTransaction transaction, string query, SqlParameter[]? parameters = null)
     {
         SqlCommand cmd = new SqlCommand(query, conn, transaction);
         cmd.Parameters.AddRange(parameters);
