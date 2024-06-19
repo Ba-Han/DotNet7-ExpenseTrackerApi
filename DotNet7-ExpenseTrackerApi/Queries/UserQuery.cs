@@ -24,6 +24,20 @@ public class UserQuery
     }
     #endregion
 
+    #region GetLoginQuery
+    public static string GetLoginlistQuery()
+    {
+        return @"SELECT [UserId]
+      ,[UserName]
+      ,[Email]
+      ,[UserRole]
+      ,[DOB]
+      ,[Gender]
+      ,[IsActive]
+  FROM [dbo].[Users] WHERE IsActive = @IsActive ORDER BY UserId DESC";
+    }
+    #endregion
+
     #region GetDuplicateEmailQuery
     public static string GetDuplicateEmailQuery()
     {
@@ -48,7 +62,20 @@ public class UserQuery
       ,[DOB]
       ,[Gender]
       ,[IsActive]
-  FROM [dbo].[Users] WHERE UserId = @UserId AND IsActive = @IsActive";
+  FROM [dbo].[Users] WHERE UserId != @UserId AND UserName =@UserName AND IsActive = @IsActive";
+    }
+    #endregion
+
+    #region UpdateExpenseQuery
+    public static string UpdateRegisterQuery()
+    {
+        return @"UPDATE Users SET
+        UserName = @UserName, 
+        Email = @Email,
+        UserRole = @UserRole,
+        DOB = @DOB,
+        Gender = @Gender
+        WHERE UserId = @UserId";
     }
     #endregion
 }

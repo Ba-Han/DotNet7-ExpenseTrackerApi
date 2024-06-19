@@ -27,4 +27,16 @@ public class BalanceQuery
 WHERE UserId = @UserId";
     }
     #endregion
+
+    #region GetBalanceList
+    public static string GetBalanceList()
+    {
+        return @"SELECT [BalanceId]
+      ,[UserId]
+      ,[Amount]
+      ,[CreateDate]
+      ,[UpdateDate]
+  FROM [dbo].[Balance]";
+    }
+    #endregion
 }

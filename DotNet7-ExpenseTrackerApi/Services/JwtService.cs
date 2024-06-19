@@ -23,7 +23,7 @@ public class JwtService
             new Claim("UserId", _aesService.EncryptString(user.UserId.ToString())),
             new Claim("UserName", _aesService.EncryptString(user.UserName)),
             new Claim("Email", _aesService.EncryptString(user.Email)),
-            new Claim("UserRole", _aesService.EncryptString(user.UserRole))
+            new Claim("UserRole", _aesService.EncryptString(Convert.ToString(user.UserRole)))
         };
 
         string keyString = _configuration["Jwt:Key"]!;

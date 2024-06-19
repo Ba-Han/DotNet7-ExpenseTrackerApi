@@ -11,7 +11,7 @@ public class UserModel
     public string UserName { get; set; } = null!;
     public string Email { get; set; } = null!;
     public string Password { get; set; } = null!;
-    public string UserRole { get; set; } = null!;
+    public int UserRole { get; set; }
     public string DOB { get; set; } = null!;
     public string Gender { get; set; } = null!;
     public bool IsActive { get; set; }
