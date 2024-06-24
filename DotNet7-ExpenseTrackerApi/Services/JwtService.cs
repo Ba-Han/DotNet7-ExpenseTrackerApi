@@ -27,7 +27,7 @@ public class JwtService
         };
 
         string keyString = _configuration["Jwt:Key"]!;
-        if(string.IsNullOrEmpty(keyString) || keyString.Length < 32)
+        if (string.IsNullOrEmpty(keyString) || keyString.Length < 32)
         {
             throw new ArgumentException("The JWT key is not valid. Ensure it is at least 32 characters long.");
         }
