@@ -10,8 +10,7 @@ public static class ModularService
         WebApplicationBuilder builder
     )
     {
-        services.AddCustomServices();
-        services.AddDbContextService(builder);
+        services.AddCustomServices().AddDbContextService(builder);
         return services;
     }
 
