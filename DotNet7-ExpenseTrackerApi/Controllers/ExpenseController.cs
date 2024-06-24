@@ -1,20 +1,25 @@
-﻿using DotNet7_ExpenseTrackerApi.Models.Entities;
+﻿using System.Data.SqlClient;
+using DotNet7_ExpenseTrackerApi.Models.Entities;
 using DotNet7_ExpenseTrackerApi.Models.RequestModels.Expense;
 using DotNet7_ExpenseTrackerApi.Models.ResponseModels.Expense;
 using DotNet7_ExpenseTrackerApi.Queries;
 using DotNet7_ExpenseTrackerApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Data.SqlClient;
 
 namespace DotNet7_ExpenseTrackerApi.Controllers;
+
 public class ExpenseController : BaseController
 {
     private readonly IConfiguration _configuration;
     private readonly AdoDotNetService _adoDotNetService;
     private readonly AppDbContext _appDbContext;
 
-    public ExpenseController(IConfiguration configuration, AdoDotNetService adoDotNetService, AppDbContext appDbContext)
+    public ExpenseController(
+        IConfiguration configuration,
+        AdoDotNetService adoDotNetService,
+        AppDbContext appDbContext
+    )
     {
         _configuration = configuration;
         _adoDotNetService = adoDotNetService;
@@ -30,14 +35,13 @@ public class ExpenseController : BaseController
             if (userID <= 0)
                 return BadRequest("User Id cannot be empty.");
 
-
             string query = ExpenseQuery.GetExpenseListByUserIdQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@UserId", userID),
-                new SqlParameter("@IsActive", true)
-            };
-            List<ExpenseResponseModel> lst = _adoDotNetService.Query<ExpenseResponseModel>(query, parameters.ToArray());
+            List<SqlParameter> parameters =
+                new() { new SqlParameter("@UserId", userID), new SqlParameter("@IsActive", true) };
+            List<ExpenseResponseModel> lst = _adoDotNetService.Query<ExpenseResponseModel>(
+                query,
+                parameters.ToArray()
+            );
 
             return Ok(lst);
         }
@@ -55,24 +59,26 @@ public class ExpenseController : BaseController
         try
         {
             #region Check Expense Category
-            var expenseCategory = await _appDbContext.Expense_Category
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.ExpenseCategoryId == requestModel.ExpenseCategoryId && x.IsActive);
+            var expenseCategory = await _appDbContext
+                .Expense_Category.AsNoTracking()
+                .FirstOrDefaultAsync(x =>
+                    x.ExpenseCategoryId == requestModel.ExpenseCategoryId && x.IsActive
+                );
             if (expenseCategory is null)
                 return NotFound("Expense Category Not Found or Inactive,");
             #endregion
 
             #region Check User
-            var user = await _appDbContext.Users
-                .AsNoTracking()
+            var user = await _appDbContext
+                .Users.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
             if (user is null)
                 return NotFound("User Not Found or Inactive.");
             #endregion
 
             #region Check Balance
-            var balance = await _appDbContext.Balance
-                .AsNoTracking()
+            var balance = await _appDbContext
+                .Balance.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId);
             if (balance is null)
                 return NotFound("Balance Not Found.");
@@ -88,14 +94,15 @@ public class ExpenseController : BaseController
             #endregion
 
             #region Insert Expense
-            ExpenseModel model = new()
-            {
-                UserId = requestModel.UserId,
-                ExpenseCategoryId = requestModel.ExpenseCategoryId,
-                Amount = requestModel.Amount,
-                CreateDate = requestModel.CreateDate,
-                IsActive = true
-            };
+            ExpenseModel model =
+                new()
+                {
+                    UserId = requestModel.UserId,
+                    ExpenseCategoryId = requestModel.ExpenseCategoryId,
+                    Amount = requestModel.Amount,
+                    CreateDate = requestModel.CreateDate,
+                    IsActive = true
+                };
             await _appDbContext.Expense.AddAsync(model);
             int result = await _appDbContext.SaveChangesAsync();
             #endregion
@@ -118,38 +125,43 @@ public class ExpenseController : BaseController
 
     [HttpPatch]
     [Route("/api/expense/{id}")]
-    public async Task<IActionResult> UpdateExpense([FromBody] UpdateExpenseRequestModel requestModel, long id)
+    public async Task<IActionResult> UpdateExpense(
+        [FromBody] UpdateExpenseRequestModel requestModel,
+        long id
+    )
     {
         var transaction = await _appDbContext.Database.BeginTransactionAsync();
         try
         {
             #region Check Expense
-            var expense = await _appDbContext.Expense
-                .AsNoTracking()
+            var expense = await _appDbContext
+                .Expense.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.ExpenseId == id && x.IsActive);
             if (expense is null)
                 return NotFound("Expense Not Found or Inactive.");
             #endregion
 
             #region Check Expense Category
-            var expenseCategory = await _appDbContext.Expense_Category
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.ExpenseCategoryId == requestModel.ExpenseCategoryId && x.IsActive);
+            var expenseCategory = await _appDbContext
+                .Expense_Category.AsNoTracking()
+                .FirstOrDefaultAsync(x =>
+                    x.ExpenseCategoryId == requestModel.ExpenseCategoryId && x.IsActive
+                );
             if (expenseCategory is null)
                 return NotFound("Expense Category Not Found or Inactive.");
             #endregion
 
             #region Check User
-            var user = await _appDbContext.Users
-                .AsNoTracking()
+            var user = await _appDbContext
+                .Users.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
             if (user is null)
                 return NotFound("User Not Found or Inactive.");
             #endregion
 
             #region Check Balance
-            var balance = await _appDbContext.Balance
-                .AsNoTracking()
+            var balance = await _appDbContext
+                .Balance.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId);
             if (balance is null)
                 return NotFound("Balance Not Found.");
@@ -212,8 +224,8 @@ public class ExpenseController : BaseController
 
             #region Check Expense
             // expense
-            var expense = await _appDbContext.Expense
-                .AsNoTracking()
+            var expense = await _appDbContext
+                .Expense.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.ExpenseId == id && x.IsActive);
             if (expense is null)
                 return NotFound("Expense Not Found or Inactive.");
@@ -223,8 +235,8 @@ public class ExpenseController : BaseController
 
             #region Check Balance
             // balance
-            var balance = await _appDbContext.Balance
-                .AsNoTracking()
+            var balance = await _appDbContext
+                .Balance.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == userID);
             if (balance is null)
                 return NotFound("Balance Not Found.");
