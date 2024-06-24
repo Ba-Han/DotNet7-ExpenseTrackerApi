@@ -2,7 +2,6 @@
 using DotNet7_ExpenseTrackerApi.Models.RequestModels.IncomeCategory;
 using DotNet7_ExpenseTrackerApi.Queries;
 using DotNet7_ExpenseTrackerApi.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
