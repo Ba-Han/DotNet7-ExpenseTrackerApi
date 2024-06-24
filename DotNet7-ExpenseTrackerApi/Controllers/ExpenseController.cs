@@ -3,7 +3,6 @@ using DotNet7_ExpenseTrackerApi.Models.RequestModels.Expense;
 using DotNet7_ExpenseTrackerApi.Models.ResponseModels.Expense;
 using DotNet7_ExpenseTrackerApi.Queries;
 using DotNet7_ExpenseTrackerApi.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data.SqlClient;
