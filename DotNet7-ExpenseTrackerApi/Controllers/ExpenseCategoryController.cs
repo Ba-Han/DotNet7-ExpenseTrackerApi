@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using DotNet7_ExpenseTrackerApi.Models.RequestModels.ExpenseCategory;
 using System.Data;
+using DotNet7_ExpenseTrackerApi.Resources;
 
 namespace DotNet7_ExpenseTrackerApi.Controllers;
 
@@ -48,7 +49,7 @@ public class ExpenseCategoryController : BaseController
         {
             //checkDuplicateCreateExpenseCategory
             if (string.IsNullOrEmpty(requestModel.ExpenseCategoryName))
-                return BadRequest("Category name cannot be empty.");
+                return BadRequest(ExpenseCategoryMessageResource.RequiredMessage);
 
             string duplicateQuery = ExpenseCategoryQuery.CheckCreateExpenseCategoryDuplicateQuery();
             List<SqlParameter> duplicateParams = new()
@@ -58,7 +59,7 @@ public class ExpenseCategoryController : BaseController
             };
             DataTable dt = _adoDotNetService.QueryFirstOrDefault(duplicateQuery, duplicateParams.ToArray());
             if (dt.Rows.Count > 0)
-                return Conflict("Expense Category Name already exists!");
+                return Conflict(ExpenseCategoryMessageResource.Duplicate);
 
             //createExpenseCategory
             string query = ExpenseCategoryQuery.CreateExpenseCategoryQuery();
@@ -69,7 +70,7 @@ public class ExpenseCategoryController : BaseController
             };
             int result = _adoDotNetService.Execute(query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(201, "Creating Successful!") : BadRequest("Creating Fail!");
+            return result > 0 ? StatusCode(201, ExpenseCategoryMessageResource.SaveSuccess) : BadRequest(ExpenseCategoryMessageResource.SaveFail);
         }
         catch (Exception ex)
         {
@@ -85,7 +86,7 @@ public class ExpenseCategoryController : BaseController
         {
             //checkDuplicateUpdateExpenseCategory
             if (string.IsNullOrEmpty(requestModel.ExpenseCategoryName))
-                return BadRequest("Category name cannot be empty.");
+                return BadRequest(ExpenseCategoryMessageResource.RequiredMessage);
 
             string duplicateQuery = ExpenseCategoryQuery.CheckUpdateExpenseCategoryDuplicateQuery();
             List<SqlParameter> duplicateParams = new()
@@ -96,7 +97,7 @@ public class ExpenseCategoryController : BaseController
             };
             DataTable dt = _adoDotNetService.QueryFirstOrDefault(duplicateQuery, duplicateParams.ToArray());
             if (dt.Rows.Count > 0)
-                return Conflict("Expense Category Name already exists.");
+                return Conflict(ExpenseCategoryMessageResource.Duplicate);
 
             //updateExpenseCategory
             string query = ExpenseCategoryQuery.UpdateExpenseCategoryQuery();
@@ -107,7 +108,7 @@ public class ExpenseCategoryController : BaseController
             };
             int result = _adoDotNetService.Execute(query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(202, "Updating Successful!") : BadRequest("Updating Fail!");
+            return result > 0 ? StatusCode(202, ExpenseCategoryMessageResource.UpdateSuccess) : BadRequest(ExpenseCategoryMessageResource.UpdateFail);
         }
         catch (Exception ex)
         {
@@ -130,7 +131,7 @@ public class ExpenseCategoryController : BaseController
             DataTable dt = _adoDotNetService.QueryFirstOrDefault(validateQuery, validateParams.ToArray());
 
             if (dt.Rows.Count > 0)
-                return Conflict("Expense with this category already exists! Cannot delete.");
+                return Conflict(ExpenseCategoryMessageResource.DeleteWarningMessage);
 
             //deleteExpenseCategoryQuery
             string query = ExpenseCategoryQuery.DeleteExpenseCategoryQuery();
@@ -141,7 +142,7 @@ public class ExpenseCategoryController : BaseController
             };
             int result = _adoDotNetService.Execute(query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(202, "Deleting Successful!") : BadRequest("Deleting Fail!");
+            return result > 0 ? StatusCode(202, ExpenseCategoryMessageResource.DeleteSuccess) : BadRequest(ExpenseCategoryMessageResource.DeleteFail);
         }
         catch (Exception ex)
         {
