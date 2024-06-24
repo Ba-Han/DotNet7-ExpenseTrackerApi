@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Newtonsoft.Json;
-using System.Data;
+﻿using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Newtonsoft.Json;
 
 namespace DotNet7_ExpenseTrackerApi.Services;
+
 public class AdoDotNetService
 {
     private readonly IConfiguration _configuration;
@@ -17,7 +18,9 @@ public class AdoDotNetService
     #region Query
     public List<T> Query<T>(string query, SqlParameter[]? parameters = null)
     {
-        SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        SqlConnection conn = new SqlConnection(
+            _configuration.GetConnectionString("DefaultConnection")
+        );
         conn.Open();
         SqlCommand cmd = new SqlCommand(query, conn);
         cmd.Parameters.AddRange(parameters);
@@ -34,7 +37,12 @@ public class AdoDotNetService
     #endregion
 
     #region Query With Transaction
-    public List<T> Query<T>(SqlConnection conn, SqlTransaction transaction, string query, SqlParameter[]? parameters = null)
+    public List<T> Query<T>(
+        SqlConnection conn,
+        SqlTransaction transaction,
+        string query,
+        SqlParameter[]? parameters = null
+    )
     {
         SqlCommand cmd = new SqlCommand(query, conn, transaction);
         cmd.Parameters.AddRange(parameters);
@@ -52,7 +60,9 @@ public class AdoDotNetService
     #region QueryFirstOrDefault
     public DataTable QueryFirstOrDefault(string query, SqlParameter[]? parameters = null)
     {
-        SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        SqlConnection conn = new SqlConnection(
+            _configuration.GetConnectionString("DefaultConnection")
+        );
         conn.Open();
         SqlCommand cmd = new SqlCommand(query, conn);
         cmd.Parameters.AddRange(parameters);
@@ -66,7 +76,12 @@ public class AdoDotNetService
     #endregion
 
     #region QueryFirstOrDefault With Transaction
-    public DataTable QueryFirstOrDefault(SqlConnection conn, SqlTransaction transaction, string query, SqlParameter[]? parameters = null)
+    public DataTable QueryFirstOrDefault(
+        SqlConnection conn,
+        SqlTransaction transaction,
+        string query,
+        SqlParameter[]? parameters = null
+    )
     {
         SqlCommand cmd = new SqlCommand(query, conn, transaction);
         cmd.Parameters.AddRange(parameters);
@@ -81,7 +96,9 @@ public class AdoDotNetService
     #region Excute
     public int Execute(string query, SqlParameter[]? parameters = null)
     {
-        SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        SqlConnection conn = new SqlConnection(
+            _configuration.GetConnectionString("DefaultConnection")
+        );
         conn.Open();
         SqlCommand cmd = new SqlCommand(query, conn);
         cmd.Parameters.AddRange(parameters);
@@ -93,7 +110,12 @@ public class AdoDotNetService
     #endregion
 
     #region Excute With Transaction
-    public int Execute(SqlConnection conn, SqlTransaction transaction, string query, SqlParameter[]? parameters = null)
+    public int Execute(
+        SqlConnection conn,
+        SqlTransaction transaction,
+        string query,
+        SqlParameter[]? parameters = null
+    )
     {
         SqlCommand cmd = new SqlCommand(query, conn, transaction);
         cmd.Parameters.AddRange(parameters);
