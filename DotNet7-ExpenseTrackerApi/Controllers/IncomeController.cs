@@ -1,20 +1,25 @@
-﻿using DotNet7_ExpenseTrackerApi.Models.Entities;
+﻿using System.Data.SqlClient;
+using DotNet7_ExpenseTrackerApi.Models.Entities;
 using DotNet7_ExpenseTrackerApi.Models.RequestModels.Income;
 using DotNet7_ExpenseTrackerApi.Models.ResponseModels.Income;
 using DotNet7_ExpenseTrackerApi.Queries;
 using DotNet7_ExpenseTrackerApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Data.SqlClient;
 
 namespace DotNet7_ExpenseTrackerApi.Controllers;
+
 public class IncomeController : BaseController
 {
     private readonly IConfiguration _configuration;
     private readonly AdoDotNetService _adoDotNetService;
     private readonly AppDbContext _appDbContext;
 
-    public IncomeController(IConfiguration configuration, AdoDotNetService adoDotNetService, AppDbContext appDbContext)
+    public IncomeController(
+        IConfiguration configuration,
+        AdoDotNetService adoDotNetService,
+        AppDbContext appDbContext
+    )
     {
         _configuration = configuration;
         _adoDotNetService = adoDotNetService;
@@ -31,12 +36,12 @@ public class IncomeController : BaseController
                 return BadRequest("User Id cannot be empty.");
 
             string query = IncomeQuery.GetIncomeListByUserIdQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@UserId", userID),
-                new SqlParameter("@IsActive", true)
-            };
-            List<IncomeResponseModel> lst = _adoDotNetService.Query<IncomeResponseModel>(query, parameters.ToArray());
+            List<SqlParameter> parameters =
+                new() { new SqlParameter("@UserId", userID), new SqlParameter("@IsActive", true) };
+            List<IncomeResponseModel> lst = _adoDotNetService.Query<IncomeResponseModel>(
+                query,
+                parameters.ToArray()
+            );
 
             return Ok(lst);
         }
@@ -65,16 +70,18 @@ public class IncomeController : BaseController
             #endregion
 
             #region Check Income Category Valid
-            var incomeCategory = await _appDbContext.Income_Category
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive);
+            var incomeCategory = await _appDbContext
+                .Income_Category.AsNoTracking()
+                .FirstOrDefaultAsync(x =>
+                    x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive
+                );
             if (incomeCategory is null)
                 return NotFound("Income Category Not Found or Inactive.");
             #endregion
 
             #region Check User Valid
-            var user = await _appDbContext.Users
-                .AsNoTracking()
+            var user = await _appDbContext
+                .Users.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
             if (user is null)
                 return NotFound("User Not Found or Inactive");
@@ -84,24 +91,29 @@ public class IncomeController : BaseController
 
             #region Balance Update
             string balanceUpdateQuery = BalanceQuery.UpdateBalanceQuery();
-            List<SqlParameter> balanceUpdateParams = new()
-            {
-                new SqlParameter("@Amount", updatedBalance),
-                new SqlParameter("@UserId", Convert.ToInt64(dt.Rows[0]["UserId"])),
-                new SqlParameter("@UpdateDate", DateTime.Now)
-            };
-            int balanceResult = _adoDotNetService.Execute(balanceUpdateQuery, balanceUpdateParams.ToArray());
+            List<SqlParameter> balanceUpdateParams =
+                new()
+                {
+                    new SqlParameter("@Amount", updatedBalance),
+                    new SqlParameter("@UserId", Convert.ToInt64(dt.Rows[0]["UserId"])),
+                    new SqlParameter("@UpdateDate", DateTime.Now)
+                };
+            int balanceResult = _adoDotNetService.Execute(
+                balanceUpdateQuery,
+                balanceUpdateParams.ToArray()
+            );
             #endregion
 
             #region Create Income
-            IncomeModel model = new()
-            {
-                Amount = requestModel.Amount,
-                CreateDate = requestModel.CreateDate,
-                IncomeCategoryId = requestModel.IncomeCategoryId,
-                IsActive = true,
-                UserId = requestModel.UserId
-            };
+            IncomeModel model =
+                new()
+                {
+                    Amount = requestModel.Amount,
+                    CreateDate = requestModel.CreateDate,
+                    IncomeCategoryId = requestModel.IncomeCategoryId,
+                    IsActive = true,
+                    UserId = requestModel.UserId
+                };
             await _appDbContext.Income.AddAsync(model);
             int incomeResult = await _appDbContext.SaveChangesAsync();
             #endregion
@@ -124,38 +136,43 @@ public class IncomeController : BaseController
 
     [HttpPatch]
     [Route("/api/income/{id}")]
-    public async Task<IActionResult> UpdateIncome([FromBody] UpdateIncomeRequestModel requestModel, long id)
+    public async Task<IActionResult> UpdateIncome(
+        [FromBody] UpdateIncomeRequestModel requestModel,
+        long id
+    )
     {
         var transaction = await _appDbContext.Database.BeginTransactionAsync();
         try
         {
             #region Check Income
-            var item = await _appDbContext.Income
-                .AsNoTracking()
+            var item = await _appDbContext
+                .Income.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeId == id && x.IsActive);
             if (item is null)
                 return NotFound("Income Not Found.");
             #endregion
 
             #region Check Income Category
-            var incomeCategory = await _appDbContext.Income_Category
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive);
+            var incomeCategory = await _appDbContext
+                .Income_Category.AsNoTracking()
+                .FirstOrDefaultAsync(x =>
+                    x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive
+                );
             if (incomeCategory is null)
                 return NotFound("Income Category Not Found or Inactive.");
             #endregion
 
             #region Check User Valid
-            var user = await _appDbContext.Users
-                .AsNoTracking()
+            var user = await _appDbContext
+                .Users.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
             if (user is null)
                 return NotFound("User Not Found or Inactive");
             #endregion
 
             #region Check Balance
-            var balance = await _appDbContext.Balance
-                .AsNoTracking()
+            var balance = await _appDbContext
+                .Balance.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId);
             if (balance is null)
                 return NotFound("Balance Not Found.");
@@ -218,8 +235,8 @@ public class IncomeController : BaseController
                 return BadRequest("Id cannot be empty.");
 
             #region Check Income
-            var income = await _appDbContext.Income
-                .AsNoTracking()
+            var income = await _appDbContext
+                .Income.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeId == id && x.IsActive);
             if (income is null)
                 return NotFound("Income Not Found.");
@@ -228,8 +245,8 @@ public class IncomeController : BaseController
             long userID = income.UserId;
 
             #region Check Balance
-            var balance = await _appDbContext.Balance
-                .AsNoTracking()
+            var balance = await _appDbContext
+                .Balance.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == userID);
             if (balance is null)
                 return NotFound("Balance Not Found.");
