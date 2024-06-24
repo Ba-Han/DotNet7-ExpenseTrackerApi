@@ -1,8 +1,6 @@
 ﻿using DotNet7_ExpenseTrackerApi.Services;
 using DotNet7_ExpenseTrackerApi.Queries;
 using DotNet7_ExpenseTrackerApi.Models.Entities;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using DotNet7_ExpenseTrackerApi.Models.RequestModels.ExpenseCategory;
