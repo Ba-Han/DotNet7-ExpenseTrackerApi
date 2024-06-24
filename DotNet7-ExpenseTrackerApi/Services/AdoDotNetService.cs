@@ -1,7 +1,5 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 
 namespace DotNet7_ExpenseTrackerApi.Services;
