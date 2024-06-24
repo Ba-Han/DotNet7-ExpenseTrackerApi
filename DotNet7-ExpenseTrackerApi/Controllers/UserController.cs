@@ -12,7 +12,7 @@ using System.Data.SqlClient;
 
 namespace DotNet7_ExpenseTrackerApi.Controllers;
 
-public class UserController : ControllerBase
+public class UserController : BaseController
 {
     private readonly AdoDotNetService _adoDotNetService;
     private readonly IConfiguration _configuration;
@@ -125,7 +125,7 @@ public class UserController : ControllerBase
         catch (Exception ex)
         {
             transaction.Rollback();
-            return BadRequest(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -196,7 +196,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -227,7 +227,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -248,7 +248,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 }

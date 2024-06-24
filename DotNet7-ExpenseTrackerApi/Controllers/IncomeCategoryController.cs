@@ -8,7 +8,7 @@ using System.Data;
 using System.Data.SqlClient;
 
 namespace DotNet7_ExpenseTrackerApi.Controllers;
-public class IncomeCategoryController : ControllerBase
+public class IncomeCategoryController : BaseController
 {
     private readonly IConfiguration _configuration;
     private readonly AdoDotNetService _adoDotNetService;
@@ -36,7 +36,7 @@ public class IncomeCategoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -73,7 +73,7 @@ public class IncomeCategoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -111,7 +111,7 @@ public class IncomeCategoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -145,7 +145,7 @@ public class IncomeCategoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 }

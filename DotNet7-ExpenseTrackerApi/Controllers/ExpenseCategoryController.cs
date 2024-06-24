@@ -10,7 +10,7 @@ using System.Data;
 
 namespace DotNet7_ExpenseTrackerApi.Controllers;
 
-public class ExpenseCategoryController : ControllerBase
+public class ExpenseCategoryController : BaseController
 {
     private readonly AdoDotNetService _adoDotNetService;
 
@@ -32,11 +32,11 @@ public class ExpenseCategoryController : ControllerBase
             };
             List<ExpenseCategoryModel> lst = _adoDotNetService.Query<ExpenseCategoryModel>(query, parameters.ToArray());
 
-            return Ok(lst);
+            return Content(lst);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -73,7 +73,7 @@ public class ExpenseCategoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -111,7 +111,7 @@ public class ExpenseCategoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -145,7 +145,7 @@ public class ExpenseCategoryController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 }

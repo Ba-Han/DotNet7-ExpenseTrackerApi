@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data.SqlClient;
 
 namespace DotNet7_ExpenseTrackerApi.Controllers;
-public class IncomeController : ControllerBase
+public class IncomeController : BaseController
 {
     private readonly IConfiguration _configuration;
     private readonly AdoDotNetService _adoDotNetService;
@@ -43,7 +43,7 @@ public class IncomeController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -119,7 +119,7 @@ public class IncomeController : ControllerBase
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -204,7 +204,7 @@ public class IncomeController : ControllerBase
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -263,7 +263,7 @@ public class IncomeController : ControllerBase
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 }
