@@ -1,11 +1,8 @@
 ﻿using DotNet7_ExpenseTrackerApi.Enums;
 using DotNet7_ExpenseTrackerApi.Models.Entities;
-using DotNet7_ExpenseTrackerApi.Models.RequestModels.IncomeCategory;
 using DotNet7_ExpenseTrackerApi.Models.RequestModels.User;
 using DotNet7_ExpenseTrackerApi.Queries;
 using DotNet7_ExpenseTrackerApi.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
