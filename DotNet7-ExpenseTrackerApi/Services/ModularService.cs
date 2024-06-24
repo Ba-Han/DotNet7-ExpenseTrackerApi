@@ -2,9 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNet7_ExpenseTrackerApi.Services;
+
 public static class ModularService
 {
-    public static IServiceCollection AddServices(this IServiceCollection services, WebApplicationBuilder builder)
+    public static IServiceCollection AddServices(
+        this IServiceCollection services,
+        WebApplicationBuilder builder
+    )
     {
         services.AddCustomServices();
         services.AddDbContextService(builder);
@@ -31,7 +35,10 @@ public static class ModularService
     #endregion
 
     #region AddDbContextService
-    public static IServiceCollection AddDbContextService(this IServiceCollection services, WebApplicationBuilder builder)
+    public static IServiceCollection AddDbContextService(
+        this IServiceCollection services,
+        WebApplicationBuilder builder
+    )
     {
         services.AddDbContext<AppDbContext>(opt =>
         {
