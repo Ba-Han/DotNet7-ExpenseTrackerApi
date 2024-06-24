@@ -1,9 +1,8 @@
-﻿namespace DotNet7_ExpenseTrackerApi.Enums
+﻿namespace DotNet7_ExpenseTrackerApi.Enums;
+
+public enum EnumUserRoles
 {
-    public enum EnumUserRoles
-    {
-        None,
-        User,
-        Admin
-    }
+    None,
+    User,
+    Admin
 }
