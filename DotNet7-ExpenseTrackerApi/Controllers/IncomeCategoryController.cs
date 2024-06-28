@@ -13,7 +13,10 @@ public class IncomeCategoryController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly AdoDotNetService _adoDotNetService;
 
-    public IncomeCategoryController(IConfiguration configuration, AdoDotNetService adoDotNetService)
+    public IncomeCategoryController (
+        IConfiguration configuration,
+        AdoDotNetService adoDotNetService
+    )
     {
         _configuration = configuration;
         _adoDotNetService = adoDotNetService;

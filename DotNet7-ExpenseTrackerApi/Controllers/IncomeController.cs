@@ -15,7 +15,11 @@ public class IncomeController : ControllerBase
     private readonly AdoDotNetService _adoDotNetService;
     private readonly AppDbContext _appDbContext;
 
-    public IncomeController(IConfiguration configuration, AdoDotNetService adoDotNetService, AppDbContext appDbContext)
+    public IncomeController (
+        IConfiguration configuration,
+        AdoDotNetService adoDotNetService,
+        AppDbContext appDbContext
+    )
     {
         _configuration = configuration;
         _adoDotNetService = adoDotNetService;
@@ -55,6 +59,7 @@ public class IncomeController : ControllerBase
         try
         {
             #region Check Balance according to the User ID
+
             string query = BalanceQuery.GetBalanceByUserId();
             SqlParameter[] parameters = { new("@UserId", requestModel.UserId) };
             var dt = _adoDotNetService.QueryFirstOrDefault(query, parameters);
@@ -63,27 +68,33 @@ public class IncomeController : ControllerBase
                 return NotFound("Balance not found.");
 
             decimal balance = Convert.ToDecimal(dt.Rows[0]["Amount"]);
+
             #endregion
 
             #region Check Income Category Valid
+
             var incomeCategory = await _appDbContext.Income_Category
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive);
             if (incomeCategory is null)
                 return NotFound("Income Category Not Found or Inactive.");
+
             #endregion
 
             #region Check User Valid
+
             var user = await _appDbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
             if (user is null)
                 return NotFound("User Not Found or Inactive");
+
             #endregion
 
             decimal updatedBalance = balance + requestModel.Amount;
 
             #region Balance Update
+
             string balanceUpdateQuery = BalanceQuery.UpdateBalanceQuery();
             List<SqlParameter> balanceUpdateParams = new()
             {
@@ -92,9 +103,11 @@ public class IncomeController : ControllerBase
                 new SqlParameter("@UpdateDate", DateTime.Now)
             };
             int balanceResult = _adoDotNetService.Execute(balanceUpdateQuery, balanceUpdateParams.ToArray());
+
             #endregion
 
             #region Create Income
+
             IncomeModel model = new()
             {
                 Amount = requestModel.Amount,
@@ -105,6 +118,7 @@ public class IncomeController : ControllerBase
             };
             await _appDbContext.Income.AddAsync(model);
             int incomeResult = await _appDbContext.SaveChangesAsync();
+
             #endregion
 
             if (balanceResult > 0 && incomeResult > 0)
@@ -131,35 +145,43 @@ public class IncomeController : ControllerBase
         try
         {
             #region Check Income
+
             var item = await _appDbContext.Income
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeId == id && x.IsActive);
             if (item is null)
                 return NotFound("Income Not Found.");
+
             #endregion
 
             #region Check Income Category
+
             var incomeCategory = await _appDbContext.Income_Category
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive);
             if (incomeCategory is null)
                 return NotFound("Income Category Not Found or Inactive.");
+
             #endregion
 
             #region Check User Valid
+
             var user = await _appDbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
             if (user is null)
                 return NotFound("User Not Found or Inactive");
+
             #endregion
 
             #region Check Balance
+
             var balance = await _appDbContext.Balance
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId);
             if (balance is null)
                 return NotFound("Balance Not Found.");
+
             #endregion
 
             decimal oldBalance = balance.Amount;
@@ -181,15 +203,19 @@ public class IncomeController : ControllerBase
             }
 
             #region Update Balance
+
             balance.Amount = newBalance;
             _appDbContext.Entry(balance).State = EntityState.Modified;
             int balanceResult = await _appDbContext.SaveChangesAsync();
+
             #endregion
 
             #region Update Income
+
             item.Amount = newIncome;
             _appDbContext.Entry(item).State = EntityState.Modified;
             int result = await _appDbContext.SaveChangesAsync();
+
             #endregion
 
             if (balanceResult > 0 && result > 0)
@@ -219,36 +245,44 @@ public class IncomeController : ControllerBase
                 return BadRequest("Id cannot be empty.");
 
             #region Check Income
+
             var income = await _appDbContext.Income
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeId == id && x.IsActive);
             if (income is null)
                 return NotFound("Income Not Found.");
+
             #endregion
 
             long userID = income.UserId;
 
             #region Check Balance
+
             var balance = await _appDbContext.Balance
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == userID);
             if (balance is null)
                 return NotFound("Balance Not Found.");
+
             #endregion
 
             decimal balanceAmount = balance.Amount;
             decimal updatedBalance = balanceAmount - income.Amount;
 
             #region Balance Update
+
             balance.Amount = updatedBalance;
             _appDbContext.Entry(balance).State = EntityState.Modified;
             int balanceResult = await _appDbContext.SaveChangesAsync();
+
             #endregion
 
             #region Delete Income
+
             income.IsActive = false;
             _appDbContext.Entry(income).State = EntityState.Modified;
             int result = await _appDbContext.SaveChangesAsync();
+
             #endregion
 
             if (balanceResult > 0 && result > 0)
