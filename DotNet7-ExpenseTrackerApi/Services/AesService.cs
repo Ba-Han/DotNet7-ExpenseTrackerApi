@@ -2,6 +2,7 @@
 using System.Text;
 
 namespace DotNet7_ExpenseTrackerApi.Services;
+
 public class AesService
 {
     private readonly IConfiguration _configuration;
@@ -23,7 +24,11 @@ public class AesService
             ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
             using MemoryStream memoryStream = new MemoryStream();
-            using CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, encryptor, CryptoStreamMode.Write);
+            using CryptoStream cryptoStream = new CryptoStream(
+                (Stream)memoryStream,
+                encryptor,
+                CryptoStreamMode.Write
+            );
             using (StreamWriter streamWriter = new((Stream)cryptoStream))
             {
                 streamWriter.Write(raw);
@@ -46,7 +51,8 @@ public class AesService
         ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
         using MemoryStream memoryStream = new(buffer);
-        using CryptoStream cryptoStream = new((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
+        using CryptoStream cryptoStream =
+            new((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
         using StreamReader streamReader = new((Stream)cryptoStream);
         return streamReader.ReadToEnd();
     }

@@ -1,21 +1,21 @@
-﻿using DotNet7_ExpenseTrackerApi.Models.Entities;
+﻿using System.Data.SqlClient;
+using DotNet7_ExpenseTrackerApi.Models.Entities;
 using DotNet7_ExpenseTrackerApi.Models.RequestModels.Income;
 using DotNet7_ExpenseTrackerApi.Models.ResponseModels.Income;
 using DotNet7_ExpenseTrackerApi.Queries;
 using DotNet7_ExpenseTrackerApi.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Data.SqlClient;
 
 namespace DotNet7_ExpenseTrackerApi.Controllers;
-public class IncomeController : ControllerBase
+
+public class IncomeController : BaseController
 {
     private readonly IConfiguration _configuration;
     private readonly AdoDotNetService _adoDotNetService;
     private readonly AppDbContext _appDbContext;
 
-    public IncomeController (
+    public IncomeController(
         IConfiguration configuration,
         AdoDotNetService adoDotNetService,
         AppDbContext appDbContext
@@ -36,18 +36,18 @@ public class IncomeController : ControllerBase
                 return BadRequest("User Id cannot be empty.");
 
             string query = IncomeQuery.GetIncomeListByUserIdQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@UserId", userID),
-                new SqlParameter("@IsActive", true)
-            };
-            List<IncomeResponseModel> lst = _adoDotNetService.Query<IncomeResponseModel>(query, parameters.ToArray());
+            List<SqlParameter> parameters =
+                new() { new SqlParameter("@UserId", userID), new SqlParameter("@IsActive", true) };
+            List<IncomeResponseModel> lst = _adoDotNetService.Query<IncomeResponseModel>(
+                query,
+                parameters.ToArray()
+            );
 
             return Ok(lst);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -72,7 +72,6 @@ public class IncomeController : ControllerBase
             #endregion
 
             #region Check Income Category Valid
-
             var incomeCategory = await _appDbContext.Income_Category
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive);
@@ -82,7 +81,6 @@ public class IncomeController : ControllerBase
             #endregion
 
             #region Check User Valid
-
             var user = await _appDbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
@@ -103,11 +101,9 @@ public class IncomeController : ControllerBase
                 new SqlParameter("@UpdateDate", DateTime.Now)
             };
             int balanceResult = _adoDotNetService.Execute(balanceUpdateQuery, balanceUpdateParams.ToArray());
-
             #endregion
 
             #region Create Income
-
             IncomeModel model = new()
             {
                 Amount = requestModel.Amount,
@@ -133,19 +129,21 @@ public class IncomeController : ControllerBase
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
     [HttpPatch]
     [Route("/api/income/{id}")]
-    public async Task<IActionResult> UpdateIncome([FromBody] UpdateIncomeRequestModel requestModel, long id)
+    public async Task<IActionResult> UpdateIncome(
+        [FromBody] UpdateIncomeRequestModel requestModel,
+        long id
+    )
     {
         var transaction = await _appDbContext.Database.BeginTransactionAsync();
         try
         {
             #region Check Income
-
             var item = await _appDbContext.Income
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeId == id && x.IsActive);
@@ -155,7 +153,6 @@ public class IncomeController : ControllerBase
             #endregion
 
             #region Check Income Category
-
             var incomeCategory = await _appDbContext.Income_Category
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive);
@@ -165,7 +162,6 @@ public class IncomeController : ControllerBase
             #endregion
 
             #region Check User Valid
-
             var user = await _appDbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
@@ -175,7 +171,6 @@ public class IncomeController : ControllerBase
             #endregion
 
             #region Check Balance
-
             var balance = await _appDbContext.Balance
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId);
@@ -230,7 +225,7 @@ public class IncomeController : ControllerBase
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -245,7 +240,6 @@ public class IncomeController : ControllerBase
                 return BadRequest("Id cannot be empty.");
 
             #region Check Income
-
             var income = await _appDbContext.Income
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeId == id && x.IsActive);
@@ -257,7 +251,6 @@ public class IncomeController : ControllerBase
             long userID = income.UserId;
 
             #region Check Balance
-
             var balance = await _appDbContext.Balance
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == userID);
@@ -297,7 +290,7 @@ public class IncomeController : ControllerBase
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 }

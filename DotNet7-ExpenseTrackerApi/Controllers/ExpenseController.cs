@@ -1,20 +1,25 @@
-﻿using DotNet7_ExpenseTrackerApi.Models.Entities;
+﻿using System.Data.SqlClient;
+using DotNet7_ExpenseTrackerApi.Models.Entities;
 using DotNet7_ExpenseTrackerApi.Models.RequestModels.Expense;
 using DotNet7_ExpenseTrackerApi.Models.ResponseModels.Expense;
 using DotNet7_ExpenseTrackerApi.Queries;
 using DotNet7_ExpenseTrackerApi.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Data.SqlClient;
 
 namespace DotNet7_ExpenseTrackerApi.Controllers;
-public class ExpenseController : ControllerBase
+
+public class ExpenseController : BaseController
 {
     private readonly IConfiguration _configuration;
     private readonly AdoDotNetService _adoDotNetService;
     private readonly AppDbContext _appDbContext;
 
+    public ExpenseController(
+        IConfiguration configuration,
+        AdoDotNetService adoDotNetService,
+        AppDbContext appDbContext
+    )
     public ExpenseController (
         IConfiguration configuration,
         AdoDotNetService adoDotNetService,
@@ -35,20 +40,19 @@ public class ExpenseController : ControllerBase
             if (userID <= 0)
                 return BadRequest("User Id cannot be empty.");
 
-
             string query = ExpenseQuery.GetExpenseListByUserIdQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@UserId", userID),
-                new SqlParameter("@IsActive", true)
-            };
-            List<ExpenseResponseModel> lst = _adoDotNetService.Query<ExpenseResponseModel>(query, parameters.ToArray());
+            List<SqlParameter> parameters =
+                new() { new SqlParameter("@UserId", userID), new SqlParameter("@IsActive", true) };
+            List<ExpenseResponseModel> lst = _adoDotNetService.Query<ExpenseResponseModel>(
+                query,
+                parameters.ToArray()
+            );
 
             return Ok(lst);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -60,7 +64,6 @@ public class ExpenseController : ControllerBase
         try
         {
             #region Check Expense Category
-
             var expenseCategory = await _appDbContext.Expense_Category
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.ExpenseCategoryId == requestModel.ExpenseCategoryId && x.IsActive);
@@ -70,7 +73,6 @@ public class ExpenseController : ControllerBase
             #endregion
 
             #region Check User
-
             var user = await _appDbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
@@ -80,7 +82,6 @@ public class ExpenseController : ControllerBase
             #endregion
 
             #region Check Balance
-
             var balance = await _appDbContext.Balance
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId);
@@ -101,7 +102,6 @@ public class ExpenseController : ControllerBase
             #endregion
 
             #region Insert Expense
-
             ExpenseModel model = new()
             {
                 UserId = requestModel.UserId,
@@ -127,19 +127,21 @@ public class ExpenseController : ControllerBase
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
     [HttpPatch]
     [Route("/api/expense/{id}")]
-    public async Task<IActionResult> UpdateExpense([FromBody] UpdateExpenseRequestModel requestModel, long id)
+    public async Task<IActionResult> UpdateExpense(
+        [FromBody] UpdateExpenseRequestModel requestModel,
+        long id
+    )
     {
         var transaction = await _appDbContext.Database.BeginTransactionAsync();
         try
         {
             #region Check Expense
-
             var expense = await _appDbContext.Expense
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.ExpenseId == id && x.IsActive);
@@ -149,7 +151,6 @@ public class ExpenseController : ControllerBase
             #endregion
 
             #region Check Expense Category
-
             var expenseCategory = await _appDbContext.Expense_Category
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.ExpenseCategoryId == requestModel.ExpenseCategoryId && x.IsActive);
@@ -159,7 +160,6 @@ public class ExpenseController : ControllerBase
             #endregion
 
             #region Check User
-
             var user = await _appDbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
@@ -169,7 +169,6 @@ public class ExpenseController : ControllerBase
             #endregion
 
             #region Check Balance
-
             var balance = await _appDbContext.Balance
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId);
@@ -223,7 +222,7 @@ public class ExpenseController : ControllerBase
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -238,7 +237,7 @@ public class ExpenseController : ControllerBase
                 return BadRequest();
 
             #region Check Expense
-
+            // expense
             var expense = await _appDbContext.Expense
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.ExpenseId == id && x.IsActive);
@@ -250,7 +249,7 @@ public class ExpenseController : ControllerBase
             long userID = expense.UserId;
 
             #region Check Balance
-            
+            // balance
             var balance = await _appDbContext.Balance
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == userID);
@@ -288,7 +287,7 @@ public class ExpenseController : ControllerBase
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 }

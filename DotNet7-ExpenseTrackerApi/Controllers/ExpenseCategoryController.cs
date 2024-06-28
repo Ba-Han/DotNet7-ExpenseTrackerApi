@@ -1,16 +1,15 @@
-﻿using DotNet7_ExpenseTrackerApi.Services;
-using DotNet7_ExpenseTrackerApi.Queries;
-using DotNet7_ExpenseTrackerApi.Models.Entities;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Data;
 using System.Data.SqlClient;
+using DotNet7_ExpenseTrackerApi.Models.Entities;
 using DotNet7_ExpenseTrackerApi.Models.RequestModels.ExpenseCategory;
-using System.Data;
+using DotNet7_ExpenseTrackerApi.Queries;
+using DotNet7_ExpenseTrackerApi.Resources;
+using DotNet7_ExpenseTrackerApi.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DotNet7_ExpenseTrackerApi.Controllers;
 
-public class ExpenseCategoryController : ControllerBase
+public class ExpenseCategoryController : BaseController
 {
     private readonly AdoDotNetService _adoDotNetService;
 
@@ -26,17 +25,17 @@ public class ExpenseCategoryController : ControllerBase
         try
         {
             string query = ExpenseCategoryQuery.GetExpenseCategoryListQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@IsActive", true)
-            };
-            List<ExpenseCategoryModel> lst = _adoDotNetService.Query<ExpenseCategoryModel>(query, parameters.ToArray());
+            List<SqlParameter> parameters = new() { new SqlParameter("@IsActive", true) };
+            List<ExpenseCategoryModel> lst = _adoDotNetService.Query<ExpenseCategoryModel>(
+                query,
+                parameters.ToArray()
+            );
 
-            return Ok(lst);
+            return Content(lst);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -48,70 +47,87 @@ public class ExpenseCategoryController : ControllerBase
         {
             //checkDuplicateCreateExpenseCategory
             if (string.IsNullOrEmpty(requestModel.ExpenseCategoryName))
-                return BadRequest("Category name cannot be empty.");
+                return BadRequest(ExpenseCategoryMessageResource.RequiredMessage);
 
             string duplicateQuery = ExpenseCategoryQuery.CheckCreateExpenseCategoryDuplicateQuery();
-            List<SqlParameter> duplicateParams = new()
-            {
-                new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
-                new SqlParameter("@IsActive", true)
-            };
-            DataTable dt = _adoDotNetService.QueryFirstOrDefault(duplicateQuery, duplicateParams.ToArray());
+            List<SqlParameter> duplicateParams =
+                new()
+                {
+                    new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
+                    new SqlParameter("@IsActive", true)
+                };
+            DataTable dt = _adoDotNetService.QueryFirstOrDefault(
+                duplicateQuery,
+                duplicateParams.ToArray()
+            );
             if (dt.Rows.Count > 0)
-                return Conflict("Expense Category Name already exists!");
+                return Conflict(ExpenseCategoryMessageResource.Duplicate);
 
             //createExpenseCategory
             string query = ExpenseCategoryQuery.CreateExpenseCategoryQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
-                new SqlParameter("@IsActive", true)
-            };
+            List<SqlParameter> parameters =
+                new()
+                {
+                    new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
+                    new SqlParameter("@IsActive", true)
+                };
             int result = _adoDotNetService.Execute(query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(201, "Creating Successful!") : BadRequest("Creating Fail!");
+            return result > 0
+                ? StatusCode(201, ExpenseCategoryMessageResource.SaveSuccess)
+                : BadRequest(ExpenseCategoryMessageResource.SaveFail);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
     [HttpPatch]
     [Route("/api/expense-category/{id}")]
-    public IActionResult UpdateExpenseCategory([FromBody] ExpenseCategoryRequestModel requestModel, long id)
+    public IActionResult UpdateExpenseCategory(
+        [FromBody] ExpenseCategoryRequestModel requestModel,
+        long id
+    )
     {
         try
         {
             //checkDuplicateUpdateExpenseCategory
             if (string.IsNullOrEmpty(requestModel.ExpenseCategoryName))
-                return BadRequest("Category name cannot be empty.");
+                return BadRequest(ExpenseCategoryMessageResource.RequiredMessage);
 
             string duplicateQuery = ExpenseCategoryQuery.CheckUpdateExpenseCategoryDuplicateQuery();
-            List<SqlParameter> duplicateParams = new()
-            {
-                new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
-                new SqlParameter("@IsActive", true),
-                new SqlParameter("@ExpenseCategoryId", id)
-            };
-            DataTable dt = _adoDotNetService.QueryFirstOrDefault(duplicateQuery, duplicateParams.ToArray());
+            List<SqlParameter> duplicateParams =
+                new()
+                {
+                    new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
+                    new SqlParameter("@IsActive", true),
+                    new SqlParameter("@ExpenseCategoryId", id)
+                };
+            DataTable dt = _adoDotNetService.QueryFirstOrDefault(
+                duplicateQuery,
+                duplicateParams.ToArray()
+            );
             if (dt.Rows.Count > 0)
-                return Conflict("Expense Category Name already exists.");
+                return Conflict(ExpenseCategoryMessageResource.Duplicate);
 
             //updateExpenseCategory
             string query = ExpenseCategoryQuery.UpdateExpenseCategoryQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
-                new SqlParameter("@ExpenseCategoryId", id)
-            };
+            List<SqlParameter> parameters =
+                new()
+                {
+                    new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
+                    new SqlParameter("@ExpenseCategoryId", id)
+                };
             int result = _adoDotNetService.Execute(query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(202, "Updating Successful!") : BadRequest("Updating Fail!");
+            return result > 0
+                ? StatusCode(202, ExpenseCategoryMessageResource.UpdateSuccess)
+                : BadRequest(ExpenseCategoryMessageResource.UpdateFail);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 
@@ -123,29 +139,33 @@ public class ExpenseCategoryController : ControllerBase
         {
             //checkCanNotDeleteExpenseCategory
             string validateQuery = ExpenseCategoryQuery.CheckExpenseCategoryQuery();
-            List<SqlParameter> validateParams = new()
-            {
-                new SqlParameter("@ExpenseCategoryId", id)
-            };
-            DataTable dt = _adoDotNetService.QueryFirstOrDefault(validateQuery, validateParams.ToArray());
+            List<SqlParameter> validateParams =
+                new() { new SqlParameter("@ExpenseCategoryId", id) };
+            DataTable dt = _adoDotNetService.QueryFirstOrDefault(
+                validateQuery,
+                validateParams.ToArray()
+            );
 
             if (dt.Rows.Count > 0)
-                return Conflict("Expense with this category already exists! Cannot delete.");
+                return Conflict(ExpenseCategoryMessageResource.DeleteWarningMessage);
 
             //deleteExpenseCategoryQuery
             string query = ExpenseCategoryQuery.DeleteExpenseCategoryQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@ExpenseCategoryId", id),
-                new SqlParameter("@IsActive", false)
-            };
+            List<SqlParameter> parameters =
+                new()
+                {
+                    new SqlParameter("@ExpenseCategoryId", id),
+                    new SqlParameter("@IsActive", false)
+                };
             int result = _adoDotNetService.Execute(query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(202, "Deleting Successful!") : BadRequest("Deleting Fail!");
+            return result > 0
+                ? StatusCode(202, ExpenseCategoryMessageResource.DeleteSuccess)
+                : BadRequest(ExpenseCategoryMessageResource.DeleteFail);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return InternalServerError(ex);
         }
     }
 }
