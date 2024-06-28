@@ -20,11 +20,6 @@ public class ExpenseController : BaseController
         AdoDotNetService adoDotNetService,
         AppDbContext appDbContext
     )
-    public ExpenseController (
-        IConfiguration configuration,
-        AdoDotNetService adoDotNetService,
-        AppDbContext appDbContext
-    )
     {
         _configuration = configuration;
         _adoDotNetService = adoDotNetService;
